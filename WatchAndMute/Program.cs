@@ -5,14 +5,58 @@ using System.Text;
 using System.Threading.Tasks;
 using CoreAudio;
 using CoreAudio.Interfaces;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace WatchAndMute
 {
     class Program
     {
+        //[DllImport("user32.dll", SetLastError = true)]
+        //static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
         static void Main(string[] args)
         {
+            const string Target = "vlc";
 
+            while (true)
+            {
+                MMDeviceEnumerator DevEnum = new MMDeviceEnumerator();
+                MMDevice device = DevEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+                for (int i = 0; i < device.AudioSessionManager2.Sessions.Count; i++)
+                {
+                    AudioSessionControl2 session = device.AudioSessionManager2.Sessions[i];
+                    Process p;
+                    try
+                    {
+                        p = Process.GetProcessById((int)session.GetProcessID);
+                    }
+                    catch (System.ArgumentException)
+                    {
+                        continue;
+                    }
+                    if (p.ProcessName == Target)
+                    {
+                        Console.WriteLine("found it");
+                        while (true)
+                        {
+                            if (GetForegroundWindow() == p.MainWindowHandle)
+                            {
+                                session.SimpleAudioVolume.Mute = false;
+                            }
+                            else
+                            {
+                                session.SimpleAudioVolume.Mute = true;
+                            }
+                            Thread.Sleep(1000);
+                        }
+                    }
+                }
+            }
         }
     }
+
 }
