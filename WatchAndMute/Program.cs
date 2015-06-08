@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CoreAudio;
-using CoreAudio.Interfaces;
+﻿using CoreAudio;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -13,14 +8,12 @@ namespace WatchAndMute
 {
     class Program
     {
-        //[DllImport("user32.dll", SetLastError = true)]
-        //static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
         static void Main(string[] args)
         {
-            const string Target = "vlc";
+            const string Target = "SkullGirls";
 
             while (true)
             {
@@ -40,7 +33,7 @@ namespace WatchAndMute
                     }
                     if (p.ProcessName == Target)
                     {
-                        Console.WriteLine("found it");
+                        Console.WriteLine("found {0}", Target);
                         while (true)
                         {
                             if (GetForegroundWindow() == p.MainWindowHandle)
